@@ -1,47 +1,65 @@
-import { Button } from "antd";
-import { useForm } from "react-hook-form";
+import { Button, Row } from "antd";
+import { FieldValues } from "react-hook-form";
 import { useLoginMutation } from "../redux/features/auth/authApi";
 import { useAppDispatch } from "../redux/hook";
-import { setUser } from "../redux/features/auth/authSlice";
+import { setUser, TUser } from "../redux/features/auth/authSlice";
 import { verifyToken } from "../utils/verifyToken";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import PHForm from "../components/form/PHForm";
+import PHInput from "../components/form/PHInput";
 
 const Login = () => {
-  const { register, handleSubmit } = useForm({
-    defaultValues: {
-      userId: "A-0001",
-      password: "admin123",
-    },
-  });
-
-  const [login, { error }] = useLoginMutation();
-
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
-  const onSubmit = async (data) => {
-    // console.log(data);
+  // const { register } = useForm({
+  //   defaultValues: {
+  //     userId: "A-0001",
+  //     password: "admin123",
+  //   },
+  // });
+
+  const defaultValues = {
+    userId: "A-0001",
+    password: "admin123",
+  };
+
+  const [login] = useLoginMutation();
+
+  const onSubmit = async (data: FieldValues) => {
+    console.log(data);
+    const toastId = toast("Login...");
     const userInfo = {
       id: data.userId,
       password: data.password,
     };
     const res = await login(userInfo).unwrap();
-    // console.log(res.data.accessToken);
-    const decodedInfo = verifyToken(res.data.accessToken);
-    console.log(decodedInfo);
-    dispatch(setUser({ user: {}, token: res.data.accessToken }));
+    const user = verifyToken(res.data.accessToken) as TUser;
+
+    dispatch(setUser({ user: user, token: res.data.accessToken }));
+    toast.success("User Logged in successfully", {
+      id: toastId,
+    });
+    navigate(`/${user.role}/dashboard`);
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div>
-        <label htmlFor="id">ID</label>
-        <input type="text" {...register("userId")} />
-      </div>
-      <div>
-        <label htmlFor="password">Password</label>
-        <input type="text" {...register("password")} />
-      </div>
-      <Button htmlType="submit">Login</Button>
-    </form>
+    <Row justify={"center"} align={"middle"} style={{ height: "100vh" }}>
+      <PHForm onSubmit={onSubmit} defaultValues={defaultValues}>
+        <div>
+          {/* <label htmlFor="id">ID</label> */}
+          {/* <input type="text" {...register("userId")} /> */}
+          <PHInput type="text" name="userId" label="ID:" />
+        </div>
+        <div>
+          {/* <label htmlFor="password">Password</label> */}
+          {/* <input type="text" {...register("password")} /> */}
+          <PHInput type="text" name="password" label="Password:" />
+        </div>
+        <Button htmlType="submit">Login</Button>
+      </PHForm>
+    </Row>
   );
 };
 
