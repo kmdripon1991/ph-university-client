@@ -29,7 +29,7 @@ const Login = () => {
 
   const onSubmit = async (data: FieldValues) => {
     console.log(data);
-    const toastId = toast("Login...");
+    // const toastId = toast("Login...");
     const userInfo = {
       id: data.userId,
       password: data.password,
@@ -38,9 +38,7 @@ const Login = () => {
     const user = verifyToken(res.data.accessToken) as TUser;
 
     dispatch(setUser({ user: user, token: res.data.accessToken }));
-    toast.success("User Logged in successfully", {
-      id: toastId,
-    });
+    toast.success("User Logged in successfully");
     navigate(`/${user.role}/dashboard`);
   };
 
