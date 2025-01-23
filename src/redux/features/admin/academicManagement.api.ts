@@ -11,8 +11,6 @@ const academicManagementApi = baseApi.injectEndpoints({
     //Academic Semesters
     getAllSemesters: builder.query({
       query: (args) => {
-        console.log("inside api args", args);
-
         const params = new URLSearchParams();
 
         // console.log(params);
@@ -20,7 +18,6 @@ const academicManagementApi = baseApi.injectEndpoints({
           args.forEach((item: TQueryParam) => {
             // console.log(item);
             params.append(item.name, item.value as string);
-            console.log(params);
           });
         }
 

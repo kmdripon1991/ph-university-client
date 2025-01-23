@@ -1,7 +1,15 @@
-import { Button, Space, Table, TableColumnsType, TableProps } from "antd";
+import {
+  Button,
+  Pagination,
+  Space,
+  Table,
+  TableColumnsType,
+  TableProps,
+} from "antd";
 import { useGetAllStudentsQuery } from "../../../redux/features/admin/userManagement.api";
 import { TQueryParam, TStudent } from "../../../types";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 type TTableData = Pick<
   TStudent,
@@ -9,13 +17,18 @@ type TTableData = Pick<
 >;
 
 const StudentData = () => {
-  const [params, setParams] = useState<TQueryParam[] | undefined>(undefined);
+  const [params, setParams] = useState<TQueryParam[]>([]);
+  const [page, setPage] = useState(1);
   const {
     data: studentData,
     isLoading,
     isFetching,
-  } = useGetAllStudentsQuery(params);
-  // console.log(semesterData);
+  } = useGetAllStudentsQuery([
+    { name: "page", value: page },
+    { name: "sort", value: "id" },
+    ...params,
+  ]);
+  console.log(studentData);
 
   const columns: TableColumnsType<TTableData> = [
     {
@@ -40,10 +53,13 @@ const StudentData = () => {
     },
     {
       title: "Action",
-      render: () => {
+      render: (item) => {
+        console.log(item);
         return (
           <Space>
-            <Button>Details</Button>
+            <Link to={`/admin/students/${item.key}`}>
+              <Button>Details</Button>
+            </Link>
             <Button>Update</Button>
             <Button>Block</Button>
           </Space>
@@ -79,6 +95,9 @@ const StudentData = () => {
     return <p>Loading...</p>;
   }
 
+  const metaData = studentData?.meta;
+  console.log(metaData);
+
   const tableData = studentData?.data?.map(
     ({ _id, id, fullName, email, contactNo }: TTableData) => ({
       key: _id,
@@ -88,7 +107,7 @@ const StudentData = () => {
       contactNo,
     })
   );
-  console.log(tableData);
+  // console.log(tableData);
   return (
     <div>
       <h1>This is student data</h1>
@@ -98,6 +117,14 @@ const StudentData = () => {
         loading={isFetching}
         dataSource={tableData}
         onChange={onChange}
+        pagination={false}
+      />
+      <Pagination
+        current={page}
+        onChange={(value) => setPage(value)}
+        pageSize={metaData?.limit}
+        total={metaData?.total}
+        align="end"
       />
     </div>
   );
